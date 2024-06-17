@@ -7,22 +7,24 @@ from app.auth import token_required
 @bp.route('/clients', methods=['GET'])
 @token_required
 def get_clients(current_user):
-    client_id = request.args.get('client_id')
+    client = request.get_json()
+    client_id = client.get('client_id')
 
     if client_id:
         try:
             client = Client.query.get_or_404(client_id)
             return jsonify(client.to_dict()),200
         except Exception as e:
-            return jsonify({'Error': str(e)}), 500
+            return jsonify({'Error': str(e), 'message':'opa'}), 500
     else:
         try:
             clients = Client.query.all()
-            return jsonify([clients.to_dict() for client in clients]),200
+            print(clients)
+            return jsonify([client.to_dict() for client in clients]),200
         except Exception as e:
-            return jsonify({'Error': str(e)}), 500
+            return jsonify({'Error': str(e), 'message':'eita'}), 500
         
-@bp.route('/clients', methods=['GET'])
+@bp.route('/clients', methods=['POST'])
 @token_required
 def create_client(current_user):
     try:

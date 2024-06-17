@@ -15,7 +15,7 @@ def create_app(config_class=Config):
 
     from app.routes import bp as routes_bp
     app.register_blueprint(routes_bp)
-    app.register_blueprint(auth_bp)
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
     @app.errorhandler(400)
     def bad_request(error):
