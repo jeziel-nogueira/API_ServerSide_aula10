@@ -15,7 +15,7 @@ def get_clients(current_user):
             client = Client.query.get_or_404(client_id)
             return jsonify(client.to_dict()),200
         except Exception as e:
-            return jsonify({'Error': str(e), 'message':'opa'}), 500
+            return jsonify({'Error': str(e), 'message':'Client id not found'}), 500
     else:
         try:
             clients = Client.query.all()
@@ -42,3 +42,38 @@ def create_client(current_user):
         return jsonify(client.to_dict()), 201
     except Exception as e:
         return jsonify({'Error': str(e)}), 500
+
+
+@bp.route('/clients/<int:id>', methods=['PUT'])
+@token_required
+def update_client(current_user, id):
+    #data = request.json() or {}
+    try:
+        client = Client.query.get_or_404(id)
+        data = request.json() or {}
+
+        if 'name' not in data or 'email' not in data:
+            return jsonify({'error': 'name  and email are required'}), 400
+        if Client.query.filter_by(name= data['name']).first():
+            return jsonify({'error': 'Name already registered'}), 400
+        if Client.query.filter_by(email= data['email']).first():
+            return jsonify({'error': 'Email already registered'}), 400
+        
+        client.name = data['name']
+        client.email = data['email']
+        
+        db.session.commit()
+        return jsonify(client.to_dict()), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@bp.route('/clients/<int:id>', methods=['DELETE'])
+@token_required
+def delete_client(current_user, id):
+    try:
+        client = Client.query.get_or_404(id)
+        db.session.delete(client)
+        db.session.commit()
+        return jsonify({'message': 'successfully deleted client'}), 204 # No body returned for response
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
